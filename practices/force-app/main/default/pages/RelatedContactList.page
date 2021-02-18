@@ -1,4 +1,4 @@
-<apex:page standardController="Account" setup="true" extensions="RelatedContactListController" title="Set Primary Contact" showHeader="false" sidebar="true">
+<apex:page standardController="Account" setup="true" extensions="RelatedContactListController" title="Set Primary Contact">
     
     <apex:define name="body">
         <apex:outputPanel id="userDetail">
@@ -29,13 +29,8 @@
                 
             </apex:pageBlock>
             <apex:pageBlock title="Related Contacts" id="relatedContacts">
-                <apex:form >
-                    <apex:actionFunction action="{!setAsPrimary}" name="setAsPrimary"  reRender="myPanel,myButtons">
-                        <apex:param name="selectedId" value="" assignTo="{!primaryId}" />
-                    </apex:actionFunction>
-                </apex:form>
                 <apex:pageBlockButtons location="top" >
-                    <apex:outputPanel id="myButtons">
+                    <apex:outputPanel id="myButtons" rendered="{!refreshPage}">
                         <apex:form >
                             <apex:commandButton action="{!Beginning}" title="Beginning" value="<<" disabled="{!disablePrevious}" reRender="myPanel,myButtons"/>
                             <apex:commandButton action="{!Previous}" title="Previous" value="<" disabled="{!disablePrevious}" reRender="myPanel,myButtons"/>        
@@ -45,8 +40,13 @@
                     </apex:outputPanel>
                 </apex:pageBlockButtons>
                 <apex:outputPanel id="myPanel">
+                    <apex:form >
+                        <apex:actionFunction action="{!setAsPrimary}" name="setAsPrimary" reRender="myPanel">
+                            <apex:param name="selectedId" value="" assignTo="{!primaryId}" />
+                        </apex:actionFunction>
+                    </apex:form>
                     <apex:pageMessages id="theMessages" />
-                    <apex:pageBlockTable value="{!contacts}" var="c">
+                    <apex:pageBlockTable value="{!contacts}" var="c" rendered="{!refreshPage}">
                         <apex:column value="{!c.Name}" >
                             
                             <apex:facet name="footer">
@@ -58,7 +58,7 @@
                         <apex:column value="{!c.Is_Primary_Contact__c}" />
                         <apex:column title="Action">
                             <apex:outputLink rendered="{!IF(c.Is_Primary_Contact__c == false, true, false)}" 
-                                             onclick="if(confirm('You are about to set this contact as primary.')) setAsPrimary('{!c.Id}');">
+                                             onclick="if(confirm('You are about to set this contact as primary.')) {setAsPrimary('{!c.Id}'); return false;}">
                                 Set As Primary
                             </apex:outputLink>
                             <apex:image rendered="{!IF(c.Is_Primary_Contact__c == true, true, false)}"
