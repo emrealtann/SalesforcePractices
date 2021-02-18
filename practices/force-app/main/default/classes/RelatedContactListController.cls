@@ -4,9 +4,10 @@ public with sharing class RelatedContactListController {
     private String accountId = ApexPages.currentPage().getParameters().get('account');
     private integer counter=0;  //keeps track of the offset
     private integer list_size=20; //sets the page size or number of rows
-    public integer total_size; //used to show user the total size of the list
+    private integer total_size; //used to show user the total size of the list
     private Id primaryId;
-    public String searchString = '';
+    private String searchString = '';
+    private Boolean refreshPage {get; set;}
     ApexPages.StandardController sc;
     
     public RelatedContactListController(ApexPages.StandardController sc) {
@@ -17,7 +18,11 @@ public with sharing class RelatedContactListController {
         account = [SELECT id, Name, Phone, Fax, Type, AccountNumber, Active__c
                    FROM Account
                    WHERE id = :accountId];
-        
+        refreshPage=true;
+    }
+    
+    public Boolean getRefreshPage() {
+        return refreshPage;
     }
     
     public Account getAccount() {
@@ -42,21 +47,25 @@ public with sharing class RelatedContactListController {
     
     public PageReference Beginning() { //user clicked beginning
         counter = 0;
+        refreshPage=true;
         return null;
     }
     
     public PageReference Previous() { //user clicked previous button
         counter -= list_size;
+        refreshPage=true;
         return null;
     }
     
     public PageReference Next() { //user clicked next button
         counter += list_size;
+        refreshPage=true;
         return null;
     }
     
     public PageReference End() { //user clicked end
         counter = total_size - list_size;
+        refreshPage=true;
         return null;
     }
     
@@ -95,6 +104,7 @@ public with sharing class RelatedContactListController {
                         order by Id 
                         limit :list_size 
                         offset :counter];
+        	refreshPage=true;
             return contacts;
             
         } catch (QueryException e) {
@@ -103,7 +113,8 @@ public with sharing class RelatedContactListController {
         }
     }
     
-    public void setAsPrimary() {
+    public PageReference setAsPrimary() {
+        refreshPage=false;
         List<Contact> primaryContacts = [select Id, Is_Primary_Contact__c from Contact where AccountId = :accountId and Is_Primary_Contact__c = true];
         for(Contact primaryContact : primaryContacts) {
             primaryContact.Is_Primary_Contact__c = false;
@@ -113,6 +124,9 @@ public with sharing class RelatedContactListController {
         Contact c = [select Id, Is_Primary_Contact__c from Contact where Id = :primaryId];
         c.Is_Primary_Contact__c = true;
         update c;
+        
+        refreshPage=true;
+        return null;
     }
     
     public void save() {
