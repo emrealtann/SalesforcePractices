@@ -1,58 +1,83 @@
-public inherited sharing class OpportunityAmountSummarizerBatch implements Database.Batchable<sObject>, Database.Stateful {
-    private Map<Id,String> accountPrimaryEmailMap;
+global inherited sharing class OpportunityAmountSummarizerBatch implements Database.Batchable<sObject>, Database.Stateful {
+    private Map<Id, String> accountPrimaryEmailMap;
+    private List<AggregateResult> result;
 
-    public OpportunityAmountSummarizerBatch() {
-
+    global OpportunityAmountSummarizerBatch(
+        Map<Id, String> accountPrimaryEmailMap,
+        List<AggregateResult> result
+    ) {
+        this.accountPrimaryEmailMap = accountPrimaryEmailMap;
+        this.result = result;
     }
 
-    public Database.QueryLocator start(Database.BatchableContext bc) {
-        //get primary contacts
-        List<Contact> primaryContacts = [select Id, AccountId, Email from Contact where Is_Primary_Contact__c = true];
-        
-        //fill map object
-        for(Contact c : primaryContacts) {
-            if(!accountPrimaryEmailMap.containsKey(c.AccountId)) {
-                accountPrimaryEmailMap.put(c.AccountId, c.Email);
-            }
-        }
-
-        //will use this in where clause. there is no need to summarize all account opportunities. just get who has a primary contact.
-        String accountIdJoin = String.join(accountPrimaryEmailMap.keySet(), '\',\'');
-        accountIdJoin = '\'' + accountIdJoin + '\'';
-
-        return Database.getQueryLocator('select AccountId, Account.Name AccountName, StageName, sum(Amount) SumAmount from Opportunity where AccountId in ' 
-            + accountIdJoin  + ' group by AccountId, Account.Name, StageName order by AccountId');
+    global Iterable<SObject> start(Database.BatchableContext bc) {
+        return result;
     }
 
-    public void execute(Database.BatchableContext bc, List<sObject> records){
+    global void execute(Database.BatchableContext bc, List<sObject> records) {
         // process each batch of records
-        List<Id> accountIds = new List<Id>(); 
+        List<Id> accountIds = new List<Id>();
+        Boolean addedToList = false;
         String emailContent = '<table border="1" style="border-collapse: collapse"><tr><th>Account</th><th>Stage</th><th>Amount</th></tr>';
+        List<Messaging.SingleEmailMessage> mails = new List<Messaging.SingleEmailMessage>();
 
-        for(sObject s : records) {
-        	AggregateResult ar = (AggregateResult)s;
-            Id accountId = (Id)ar.get('AccountId');
-            String accountName = (String)ar.get('AccountName');
-            String stageName = (String)ar.get('StageName');
-            Decimal sumAmount = (Decimal)ar.get('SumAmount');
-            
-            if(accountIds.contains(accountId)) {
+        for (sObject s : records) {
+            AggregateResult ar = (AggregateResult) s;
+            Id accountId = (Id) ar.get('AccountId');
+            String accountName = (String) ar.get('AccountName');
+            String stageName = (String) ar.get('StageName');
+            String sumAmount = (String) ar.get('SumAmount');
 
-            }
-            else {
+            //check if account id has changed (for grouping table rows)
+            if (accountIds.contains(accountId) || !addedToList) {
+                String row = '<tr><td>' + accountName + '</td><td>' + stageName + '</td><td>' + sumAmount + '</td></tr>';
+                System.debug(row);
+                addedToList = true;
+                emailContent += row;
+            } else {
                 //finish formatting and send email
+                addedToList = false;
                 emailContent = '<p>Below is a table of opportunities related to the account: ' + accountName + '</p>' + emailContent;
                 emailContent += '</table>';
+                System.debug(emailContent);
 
                 Messaging.SingleEmailMessage message = new Messaging.SingleEmailMessage();
-                message.setToAddresses(new List<string> { accountPrimaryEmailMap.get(accountId) });
+                message.setToAddresses(
+                    new List<string>{ accountPrimaryEmailMap.get(accountId) }
+                );
+                message.setSubject('Opportunity Summary');
                 message.setHtmlBody(emailContent);
+                mails.add(message);
             }
         }
 
-        update records;
+        Messaging.sendEmail(mails);
+
+        // String response = '';
+        // try {
+        //     Messaging.SendEmailResult[] resultMail = Messaging.sendEmail(mails);
+
+        //     if (!resultMail[0].isSuccess()) {
+        //         response = resultMail[0].getErrors().get(0).getMessage();
+        //     }
+        // } catch (System.EmailException ex) {
+        //     response = ex.getMessage();
+        // }
+        // System.debug('Send Email Error: ' + response);
     }
-    public void finish(Database.BatchableContext bc){
-        // execute any post-processing operations
+
+    global void finish(Database.BatchableContext bc) {
+        AsyncApexJob a = [
+            SELECT
+                Id,
+                Status,
+                NumberOfErrors,
+                JobItemsProcessed,
+                TotalJobItems,
+                CreatedBy.Email
+            FROM AsyncApexJob
+            WHERE Id = :BC.getJobId()
+        ];
+        System.debug('********: ' + a.Id);
     }
 }
