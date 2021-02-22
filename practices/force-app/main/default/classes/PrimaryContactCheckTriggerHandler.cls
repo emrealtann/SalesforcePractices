@@ -1,5 +1,19 @@
+/*
+* @author Emre Altan
+* @date Feb 18, 2021
+* @name PrimaryContactCheckTriggerHandler
+* @description handler for PrimaryContactCheckTrigger
+*/
 public with sharing class PrimaryContactCheckTriggerHandler {
 
+    /*
+    * @author Emre Altan
+    * @date Feb 18, 2021
+    * @name OnBefore
+    * @description executes before insert-update logic
+    * @param Contact[] newContacts
+    * @return void
+    */
     public void OnBefore(Contact[] newContacts) {
         for (Contact c : newContacts) {
             if (c.Is_Primary_Contact__c) {
@@ -19,6 +33,14 @@ public with sharing class PrimaryContactCheckTriggerHandler {
         }
     }
 
+    /*
+    * @author Emre Altan
+    * @date Feb 18, 2021
+    * @name OnAfterInsert
+    * @description executes after insert logic
+    * @param Contact[] newContacts
+    * @return void
+    */
     public void OnAfterInsert(Contact[] newContacts) {
         // EXECUTE AFTER INSERT LOGIC
 
@@ -30,6 +52,14 @@ public with sharing class PrimaryContactCheckTriggerHandler {
         }
     }
 
+    /*
+    * @author Emre Altan
+    * @date Feb 18, 2021
+    * @name OnAfterUpdate
+    * @description executes after update logic
+    * @param Contact[] oldContacts, Contact[] newContacts
+    * @return void
+    */
     public void OnAfterUpdate(Contact[] oldContacts, Contact[] newContacts) {
         // AFTER UPDATE LOGIC
         for (Integer i = 0; i < newContacts.size(); i++) {
