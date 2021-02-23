@@ -1,3 +1,9 @@
+/*
+* @author Emre Altan
+* @date Feb 17, 2021
+* @name PrimaryContactPhoneUpdateBatch
+* @description trigger for primary contact change
+*/
 trigger PrimaryContactCheckTrigger on Contact(
     before insert,
     before update,

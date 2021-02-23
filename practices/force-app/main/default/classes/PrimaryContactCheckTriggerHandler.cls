@@ -18,16 +18,20 @@ public with sharing class PrimaryContactCheckTriggerHandler {
         for (Contact c : newContacts) {
             if (c.Is_Primary_Contact__c) {
                 //check if there is another primary contact
-                Integer primaryCount = [
-                    SELECT COUNT()
-                    FROM Contact
-                    WHERE
-                        AccountId = :c.AccountId
-                        AND Id != :c.Id
-                        AND Is_Primary_Contact__c = TRUE
-                ];
-                if (primaryCount > 0) {
-                    c.addError('There is primary contact that already exists.');
+                try{
+                    Integer primaryCount = [
+                        SELECT COUNT()
+                        FROM Contact
+                        WHERE
+                            AccountId = :c.AccountId
+                            AND Id != :c.Id
+                            AND Is_Primary_Contact__c = TRUE
+                    ];
+                    if (primaryCount > 0) {
+                        c.addError('There is primary contact that already exists.');
+                    }
+                } catch (Exception ex){
+                    new LogException().log(ex);
                 }
             }
         }

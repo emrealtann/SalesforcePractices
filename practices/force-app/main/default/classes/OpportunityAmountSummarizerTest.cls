@@ -6,7 +6,6 @@
 */
 @isTest
 private class OpportunityAmountSummarizerTest {
-    
     /*
     * @author Emre Altan
     * @date Feb 19, 2021
