@@ -29,16 +29,24 @@ private class RelatedContactListTest {
 
         insert primaryContact;
 
-        Contact newContact = new Contact(
-            AccountId = addedAccount.Id, 
-            FirstName = 'New', 
-            LastName = 'TestContact2', 
-            Phone = '1111111112', 
-            Email = 'emre.altan+2@osf.digital', 
-            Is_Primary_Contact__c = false
-        );
+        List<Contact> contacts = new List<Contact>();
+        for(Integer i = 0; i < 49; i++) {
+            Contact newContact = new Contact(
+                AccountId = addedAccount.Id, 
+                FirstName = 'New', 
+                LastName = 'TestContact' + i, 
+                Phone = '111111111' + i, 
+                Email = 'emre.altan+' + i + '@osf.digital', 
+                Is_Primary_Contact__c = false
+            );
 
-        insert newContact;
+            contacts.add(newContact);
+        }
+
+        insert contacts;
+
+        // Get the IDs of the contacts we just inserted
+        Map<Id, Contact> contactsMap = new Map<Id, Contact>(contacts);
 
         Test.startTest();
 
@@ -50,32 +58,19 @@ private class RelatedContactListTest {
         RelatedContactListController controller = new RelatedContactListController(sc);
         
         //contact count test
-        List<Contact> contacts = controller.getContacts();
-        System.assertEquals(2, contacts.size());
+        List<Contact> pageContacts = controller.getContacts();
+        System.assertEquals(20, pageContacts.size());
 
         // //get refresh page test
         // Boolean refreshPage = controller.getRefreshPage();
         // System.assertEquals(true, refreshPage);
 
-        //set search string test
-        controller.setSearchString('Primary');
-        List<Contact> filteredContacts = controller.getContacts();
-        System.assertEquals(1, filteredContacts.size());
-
         //set primary contact test
-        controller.setPrimaryId(newContact.Id);
+        controller.setPrimaryId(contacts[0].Id);
         controller.setAsPrimary();
         List<Contact> primaryContacts = [select Id, FirstName from Contact where Is_Primary_Contact__c = true and AccountId = :addedAccount.Id];
         System.assertEquals(1, primaryContacts.size());
         System.assertEquals('New', primaryContacts[0].FirstName);
-
-        //disable previous test
-        Boolean disablePrev = controller.getDisablePrevious();
-        System.assertEquals(true, disablePrev);
-
-        //disable next test
-        Boolean disableNext = controller.getDisableNext();
-        System.assertEquals(true, disableNext);
 
         //page number test
         Integer pageNumber = controller.getPageNumber();
@@ -83,7 +78,44 @@ private class RelatedContactListTest {
 
         //total page count test
         Integer totalPages = controller.getTotalPages();
-        System.assertEquals(1, totalPages);
+        System.assertEquals(3, totalPages);
+
+        controller.Next();
+        pageNumber = controller.getPageNumber();
+        System.assertEquals(2, pageNumber);
+
+        controller.End();
+        pageNumber = controller.getPageNumber();
+        System.assertEquals(2, pageNumber);
+
+        //disable next test
+        Boolean disableNext = controller.getDisableNext();
+        System.assertEquals(true, disableNext);
+
+        controller.Previous();
+        pageNumber = controller.getPageNumber();
+        System.assertEquals(1, pageNumber);
+
+        controller.Beginning();
+        pageNumber = controller.getPageNumber();
+        System.assertEquals(1, pageNumber);
+
+        //disable previous test
+        Boolean disablePrev = controller.getDisablePrevious();
+        System.assertEquals(true, disablePrev);
+
+        //set search string test
+        controller.setSearchString('Primary');
+        List<Contact> filteredContacts = controller.getContacts();
+        System.assertEquals(1, filteredContacts.size());
+
+        Boolean refreshPage = controller.getRefreshPage();
+        System.assertEquals(true, refreshPage);
+
+        Account acc = controller.getAccount();
+        controller.cancel();
+        Account acc2 = controller.getAccount();
+        System.assertEquals(acc, acc2);
 
         Test.stopTest();
     }
