@@ -24,6 +24,14 @@ public inherited sharing class WeatherConditionsController{
         }
 	}
 
+    /*
+    * @author Emre Altan
+    * @date Feb 23, 2021
+    * @name getWeatherConditions
+    * @description gets weather conditions from the openweathermap api 
+    * @param null
+    * @return void
+    */
 	public void getWeatherConditions(){
 		Http http = new Http();
 		HttpRequest request = new HttpRequest();
@@ -47,18 +55,50 @@ public inherited sharing class WeatherConditionsController{
 		}
 	}
 
+    /*
+    * @author Emre Altan
+    * @date Feb 23, 2021
+    * @name getCity
+    * @description get method for city parameter
+    * @param null
+    * @return String city
+    */
     public String getCity() {
         return city;
     }
 
+    /*
+    * @author Emre Altan
+    * @date Feb 23, 2021
+    * @name getDescription
+    * @description get method for description parameter
+    * @param null
+    * @return String description
+    */
     public String getDescription() {
         return description;
     }
     
+    /*
+    * @author Emre Altan
+    * @date Feb 23, 2021
+    * @name getTemperature
+    * @description get method for temperature parameter
+    * @param null
+    * @return Decimal temperature
+    */
     public Decimal getTemperature() {
         return temperature;
     }
 
+    /*
+    * @author Emre Altan
+    * @date Feb 23, 2021
+    * @name getImageCode
+    * @description get method for imageCode parameter
+    * @param null
+    * @return String imageCode
+    */
     public String getImageCode() {
         return imageCode;
     }

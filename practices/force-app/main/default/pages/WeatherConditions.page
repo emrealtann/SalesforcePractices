@@ -8,7 +8,7 @@
                         <apex:outputText value="{!description}" />
                     </div>
                     <div>
-                        <apex:outputLabel  value="Temperature" style="margin-right:10px; font-weight: 600;"></apex:outputLabel>
+                        <apex:outputLabel value="Temperature" style="margin-right:10px; font-weight: 600;"></apex:outputLabel>
                         <apex:outputText value="{!temperature}" />
                     </div>
                 </div>
