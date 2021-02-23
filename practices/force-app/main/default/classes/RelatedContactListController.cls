@@ -20,10 +20,15 @@ public with sharing class RelatedContactListController {
         this.sc = sc;
         
         //set the total size in the constructor
-        total_size = [select count() from Contact where AccountId = :accountId];
-        account = [SELECT id, Name, Phone, Fax, Type, AccountNumber, Active__c
-                   FROM Account
-                   WHERE id = :accountId];
+        try {
+            total_size = [select count() from Contact where AccountId = :accountId];
+            account = [SELECT id, Name, Phone, Fax, Type, AccountNumber, Active__c
+                    FROM Account
+                    WHERE id = :accountId];
+        } catch (Exception ex){
+            new LogException().log(ex);
+        }
+
         refreshPage=true;
     }
     
@@ -229,6 +234,7 @@ public with sharing class RelatedContactListController {
             return contacts;
             
         } catch (QueryException e) {
+            new LogException().log(e);
             ApexPages.addMessages(e);   
             return null;
         }
@@ -244,17 +250,23 @@ public with sharing class RelatedContactListController {
     */
     public PageReference setAsPrimary() {
         refreshPage=false;
-        List<Contact> primaryContacts = [select Id, Is_Primary_Contact__c from Contact where AccountId = :accountId and Is_Primary_Contact__c = true];
-        for(Contact primaryContact : primaryContacts) {
-            primaryContact.Is_Primary_Contact__c = false;
+
+        try {
+            List<Contact> primaryContacts = [select Id, Is_Primary_Contact__c from Contact where AccountId = :accountId and Is_Primary_Contact__c = true];
+            for(Contact primaryContact : primaryContacts) {
+                primaryContact.Is_Primary_Contact__c = false;
+            }
+            update primaryContacts;
+            
+            Contact c = [select Id, Is_Primary_Contact__c from Contact where Id = :primaryId];
+            c.Is_Primary_Contact__c = true;
+            update c;
+            
+            refreshPage=true;
+        } catch (Exception ex){
+            new LogException().log(ex);
         }
-        update primaryContacts;
-        
-        Contact c = [select Id, Is_Primary_Contact__c from Contact where Id = :primaryId];
-        c.Is_Primary_Contact__c = true;
-        update c;
-        
-        refreshPage=true;
+
         return null;
     }
 
@@ -270,6 +282,7 @@ public with sharing class RelatedContactListController {
         try {
             update account;
         } catch(DmlException e) {
+            new LogException().log(e);
             ApexPages.addMessages(e);
         }
     }
@@ -283,8 +296,12 @@ public with sharing class RelatedContactListController {
     * @return void
     */
     public void cancel() {
-        account = [SELECT id, Name, Phone, Fax, Type, AccountNumber, Active__c
-                   FROM Account
-                   WHERE id = :accountId];
+        try {
+            account = [SELECT id, Name, Phone, Fax, Type, AccountNumber, Active__c
+                    FROM Account
+                    WHERE id = :accountId];
+        } catch (Exception ex){
+            new LogException().log(ex);
+        }
     }   
 }

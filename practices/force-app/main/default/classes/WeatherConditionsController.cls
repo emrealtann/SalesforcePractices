@@ -16,8 +16,13 @@ public inherited sharing class WeatherConditionsController{
 
 	public WeatherConditionsController(ApexPages.StandardController sc){
 		this.sc = sc;
-        account = [select Id, Name, ShippingCity from Account WHERE id = :accountId];
-        city = account.ShippingCity;
+
+        try {
+            account = [select Id, Name, ShippingCity from Account WHERE id = :accountId];
+            city = account.ShippingCity;
+        } catch (Exception ex){
+            new LogException().log(ex);
+        }
 
         if(!String.isBlank(city)) {
             getWeatherConditions();
