@@ -1,0 +1,20 @@
+<apex:page standardController="Account" setup="true" extensions="WeatherConditionsController" title="Weather Conditions">
+    <apex:define name="body">
+        <apex:outputPanel id="weather">
+            <apex:pageBlock title="Weather in {!city}" id="weatherPageBlock">
+                <div style="padding: 20px 5px; display: flex; justify-content: space-between;">
+                    <div>
+                        <apex:outputLabel value="Description" style="margin-right:10px; font-weight: 600;"></apex:outputLabel>
+                        <apex:outputText value="{!description}" />
+                    </div>
+                    <div>
+                        <apex:outputLabel  value="Temperature" style="margin-right:10px; font-weight: 600;"></apex:outputLabel>
+                        <apex:outputText value="{!temperature}" />
+                    </div>
+                </div>
+                <hr />
+                <apex:image value="http://openweathermap.org/img/w/{!imageCode}.png"></apex:image>
+            </apex:pageBlock>
+        </apex:outputPanel>
+    </apex:define>
+</apex:page>
