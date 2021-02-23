@@ -1,3 +1,9 @@
+/*
+* @author Emre Altan
+* @date Feb 19, 2021
+* @name OpportunityAmountSummarizerSchedule
+* @description schedule class to calculate and send opportunity summary emails by using a batch in some specific periods
+*/
 global inherited sharing class OpportunityAmountSummarizerSchedule implements Schedulable {
     @ReadOnly
     global void execute(SchedulableContext ctx) {
@@ -29,27 +35,6 @@ global inherited sharing class OpportunityAmountSummarizerSchedule implements Sc
         //execute batch
         OpportunityAmountSummarizerBatch batch = new OpportunityAmountSummarizerBatch(accountPrimaryEmailMap, result);
         Database.executeBatch(batch);
-
-        // try {
-        //     List<AggregateResult> result = [select AccountId, Account.Name AccountName, StageName, format(sum(Amount)) SumAmount 
-        //         from Opportunity 
-        //         where AccountId in :accountIdSet 
-        //         and (CreatedDate >= :startDate or LastModifiedDate >= :startDate)
-        //         group by AccountId, Account.Name, StageName order by AccountId];
-
-        //     //execute batch
-        //     OpportunityAmountSummarizerBatch batch = new OpportunityAmountSummarizerBatch(accountPrimaryEmailMap, result);
-        //     Database.executeBatch(batch);
-        // }
-        // catch(DmlException d) {
-        //     for (Integer i = 0; i < d.getNumDml(); i++) {
-        //         // Process exception here
-        //         System.debug('DML EXC:' + d.getDmlMessage(i)); 
-        //     }
-        // }
-        // catch(Exception e) {
-        //     System.debug('GENERAL EXC:' + e.getMessage()); 
-        // }
     }
 }
 
