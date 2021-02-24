@@ -51,10 +51,10 @@ global inherited sharing class OpportunityAmountSummarizerSchedule implements Sc
  String jobID = System.schedule('Opportunity Amount Summarizer', sch, summarizerSchedule);
 //once a week (Friday at 1:00 PM)
  String sch2 = '0 0 13 ? * 6';
- String jobID2 = System.schedule('Opportunity Amount Summarizer', sch2, summarizerSchedule);
+ String jobID2 = System.schedule('Opportunity Amount Summarizer2', sch2, summarizerSchedule);
 //once a month(Last Friday of the Month at 6:00 PM)
- String sch3 = '0 0 18 L * 6';
- String jobID3 = System.schedule('Opportunity Amount Summarizer', sch3, summarizerSchedule); */
+ String sch3 = '0 0 18 ? * 6L';
+ String jobID3 = System.schedule('Opportunity Amount Summarizer3', sch3, summarizerSchedule); */
 /****************SCHEDULE CALL SCRIPT*********************/
 /* OpportunityAmountSummarizerSchedule s = new OpportunityAmountSummarizerSchedule();
  s.execute(null); */
